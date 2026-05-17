@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--jetstream=false"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    ports:
+      - "8080:8080"
+    volumes:
+      - api-data:/data
+    environment:
+      NUCLEI_PLATFORM_NATS_URL: "nats://nats:4222"
+      NUCLEI_PLATFORM_DATABASE_DSN: "/data/nuclei-platform.db"
+      NUCLEI_PLATFORM_SERVER_PORT: "8080"
+      NUCLEI_PLATFORM_LOG_LEVEL: "info"
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    deploy:
+      replicas: 3
+    volumes:
+      - worker-data:/data
+    environment:
+      NUCLEI_PLATFORM_NATS_URL: "nats://nats:4222"
+      NUCLEI_PLATFORM_WORKER_NAME: ""
+      NUCLEI_PLATFORM_LOG_LEVEL: "info"
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  api-data:
+  worker-data:

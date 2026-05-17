@@ -1,0 +1,22 @@
+worker_id: ""
+worker_name: ""
+
+nuclei:
+  templates_dir: "/root/nuclei-templates"
+  exclude_tags:
+    - "dos"
+  concurrency: 25
+  rate_limit: 0
+
+nats:
+  url: "nats://nats:4222"
+  task_subject: "nuclei.task.create"
+  result_subject: "nuclei.task.result"
+  cancel_subject: "nuclei.task.cancel"
+  heartbeat_subject: "nuclei.worker.heartbeat"
+
+heartbeat_interval: 15s
+
+log:
+  level: "info"
+  format: "json"

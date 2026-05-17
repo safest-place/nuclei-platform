@@ -1,0 +1,25 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+
+database:
+  driver: "sqlite"
+  dsn: "/data/nuclei-platform.db"
+
+nats:
+  url: "nats://nats:4222"
+  task_subject: "nuclei.task.create"
+  result_subject: "nuclei.task.result"
+  cancel_subject: "nuclei.task.cancel"
+  heartbeat_subject: "nuclei.worker.heartbeat"
+
+worker:
+  heartbeat_interval: 15s
+  offline_threshold: 45s
+  max_task_duration: 1h
+
+log:
+  level: "info"
+  format: "json"
